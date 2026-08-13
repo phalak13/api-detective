@@ -1,0 +1,176 @@
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: Arial, sans-serif;
+  background: #0b1120;
+  color: white;
+}
+
+.app {
+  min-height: 100vh;
+  padding: 40px;
+}
+
+header {
+  max-width: 1000px;
+  margin: auto;
+  text-align: center;
+}
+
+.logo {
+  font-size: 32px;
+  font-weight: bold;
+}
+
+header p {
+  color: #94a3b8;
+}
+
+main {
+  max-width: 1000px;
+  margin: 40px auto;
+}
+
+.search-box {
+  display: flex;
+  gap: 12px;
+}
+
+input {
+  flex: 1;
+  padding: 16px;
+  border-radius: 8px;
+  border: 1px solid #334155;
+  background: #111827;
+  color: white;
+  font-size: 16px;
+}
+
+button {
+  padding: 16px 25px;
+  border: none;
+  border-radius: 8px;
+  background: #2563eb;
+  color: white;
+  font-size: 16px;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+button:hover {
+  background: #1d4ed8;
+}
+
+.report {
+  margin-top: 30px;
+  background: #111827;
+  padding: 25px;
+  border-radius: 12px;
+  border: 1px solid #1e293b;
+}
+
+.report h2 {
+  margin-top: 0;
+}
+
+.stats {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 15px;
+  margin: 25px 0;
+}
+
+.stats div {
+  background: #0f172a;
+  padding: 18px;
+  border-radius: 8px;
+}
+
+.stats span,
+.endpoint span {
+  display: block;
+  font-size: 12px;
+  color: #94a3b8;
+  margin-bottom: 8px;
+}
+
+.stats strong {
+  font-size: 16px;
+}
+
+.endpoint {
+  background: #0f172a;
+  padding: 18px;
+  border-radius: 8px;
+}
+
+.endpoint p {
+  margin: 0;
+  word-break: break-all;
+  color: #60a5fa;
+}
+
+.response {
+  margin-top: 20px;
+}
+
+.response h3 {
+  color: #94a3b8;
+}
+
+pre {
+  background: #020617;
+  padding: 20px;
+  border-radius: 8px;
+  overflow-x: auto;
+  line-height: 1.6;
+}
+
+.error {
+  background: #450a0a;
+  color: #fecaca;
+  padding: 15px;
+  border-radius: 8px;
+}
+
+@media (max-width: 700px) {
+  .app {
+    padding: 20px;
+  }
+
+  .search-box {
+    flex-direction: column;
+  }
+
+  .stats {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+.diagnosis {
+  margin: 20px 0;
+  padding: 20px;
+  border-radius: 10px;
+  background: #0f172a;
+  border-left: 4px solid #22c55e;
+}
+
+.diagnosis span {
+  font-size: 12px;
+  color: #94a3b8;
+  font-weight: bold;
+  letter-spacing: 1px;
+}
+
+.diagnosis h3 {
+  margin: 10px 0 5px;
+  font-size: 24px;
+}
+
+.diagnosis p {
+  margin: 0;
+  color: #cbd5e1;
+}
