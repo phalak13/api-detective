@@ -174,3 +174,41 @@ pre {
   margin: 0;
   color: #cbd5e1;
 }
+
+.health {
+  margin: 20px 0;
+  padding: 20px;
+  border-radius: 10px;
+  background: #0f172a;
+  border-left: 4px solid #22c55e;
+}
+
+.health span {
+  font-size: 12px;
+  color: #94a3b8;
+  font-weight: bold;
+  letter-spacing: 1px;
+}
+
+.health h3 {
+  margin: 10px 0 0;
+  font-size: 28px;
+}
+
+.performance {
+  margin-top: 20px;
+  padding: 15px;
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.performance span {
+  display: block;
+  font-size: 12px;
+  margin-bottom: 5px;
+}
+
+.performance h3 {
+  margin: 0;
+  font-size: 22px;
+}

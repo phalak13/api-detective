@@ -22,3 +22,9 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+backend/venv/
+my-rest-api/
+__pycache__/
+*.pyc
+node_modules/
+.env

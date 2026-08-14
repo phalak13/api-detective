@@ -1,8 +1,24 @@
 from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
 import requests
 import time
 
-app = FastAPI()
+app = FastAPI(
+    title="API Detective",
+    description="A REST API monitoring and analysis tool",
+    version="1.0.0"
+)
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=[
+    "http://localhost:5173",
+    "http://127.0.0.1:5173"
+],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 
 @app.get("/")
@@ -69,16 +85,19 @@ def analyze_status(status_code):
             "message": "The API server encountered an error."
         }
 
-    else:
-        return {
-            "category": "Unknown",
-            "severity": "UNKNOWN",
-            "message": "Unrecognized HTTP status code."
-        }
+    return {
+        "category": "Unknown",
+        "severity": "UNKNOWN",
+        "message": "Unrecognized HTTP status code."
+    }
 
 
-def calculate_health_score(status_code, security_score, response_time, is_json):
-
+def calculate_health_score(
+    status_code,
+    security_score,
+    response_time,
+    is_json
+):
     score = 0
 
     # Availability: 40 points
@@ -108,11 +127,16 @@ def calculate_health_score(status_code, security_score, response_time, is_json):
 
     return score
 
-def generate_findings(status_code, response_time, security_checks, is_json):
 
+def generate_findings(
+    status_code,
+    response_time,
+    security_checks,
+    is_json
+):
     findings = []
 
-    # Status finding
+    # Status
     if 200 <= status_code < 300:
         findings.append({
             "type": "success",
@@ -176,7 +200,10 @@ def generate_findings(status_code, response_time, security_checks, is_json):
     else:
         findings.append({
             "type": "warning",
-            "message": f"Missing security headers: {', '.join(missing_headers)}"
+            "message": (
+                f"Missing security headers: "
+                f"{', '.join(missing_headers)}"
+            )
         })
 
     # JSON
@@ -193,19 +220,33 @@ def generate_findings(status_code, response_time, security_checks, is_json):
 
     return findings
 
-@app.get("/detect")
-def detect(url: str):
+
+@app.get("/analyze")
+def analyze(url: str):
+
+    url = url.strip().strip("'\"")
 
     start_time = time.time()
 
     try:
-        response = requests.get(url, timeout=10)
+       response = requests.get(
+    url,
+    timeout=5,
+    headers={
+        "User-Agent": "API-Detective/1.0"
+    }
+)
 
         end_time = time.time()
 
-        response_time = round((end_time - start_time) * 1000, 2)
+        response_time = round(
+            (end_time - start_time) * 1000,
+            2
+        )
 
-        status_analysis = analyze_status(response.status_code)
+        status_analysis = analyze_status(
+            response.status_code
+        )
 
         headers = dict(response.headers)
 
@@ -233,17 +274,28 @@ def detect(url: str):
 
         # Security header checks
         security_checks = {
-            "Strict-Transport-Security": "Strict-Transport-Security" in headers,
-            "X-Frame-Options": "X-Frame-Options" in headers,
-            "X-Content-Type-Options": "X-Content-Type-Options" in headers,
-            "Content-Security-Policy": "Content-Security-Policy" in headers,
-            "Referrer-Policy": "Referrer-Policy" in headers
+            "Strict-Transport-Security":
+                "Strict-Transport-Security" in headers,
+
+            "X-Frame-Options":
+                "X-Frame-Options" in headers,
+
+            "X-Content-Type-Options":
+                "X-Content-Type-Options" in headers,
+
+            "Content-Security-Policy":
+                "Content-Security-Policy" in headers,
+
+            "Referrer-Policy":
+                "Referrer-Policy" in headers
         }
 
         passed = sum(security_checks.values())
         total = len(security_checks)
 
-        security_score = round((passed / total) * 100)
+        security_score = round(
+            (passed / total) * 100
+        )
 
         health_score = calculate_health_score(
             response.status_code,

@@ -5,113 +5,46 @@ function App() {
   const [url, setUrl] = useState("")
   const [result, setResult] = useState(null)
   const [loading, setLoading] = useState(false)
-  const analyzeStatus = (status) => {
-  if (status >= 200 && status < 300) {
-    return {
-      category: "Success",
-      severity: "LOW",
-      message: "API request was successful."
-    }
-  }
 
-  if (status === 400) {
-    return {
-      category: "Client Error",
-      severity: "MEDIUM",
-      message: "The API could not understand the request."
-    }
-  }
-
-  if (status === 401) {
-    return {
-      category: "Authentication Required",
-      severity: "HIGH",
-      message: "Authentication is required to access this API."
-    }
-  }
-
-  if (status === 403) {
-    return {
-      category: "Forbidden",
-      severity: "HIGH",
-      message: "The API understood the request but refused access."
-    }
-  }
-
-  if (status === 404) {
-    return {
-      category: "Not Found",
-      severity: "MEDIUM",
-      message: "The requested API endpoint could not be found."
-    }
-  }
-
-  if (status >= 500) {
-    return {
-      category: "Server Error",
-      severity: "CRITICAL",
-      message: "The API server encountered an internal problem."
-    }
-  }
-
-  return {
-    category: "Unknown",
-    severity: "MEDIUM",
-    message: "The API returned an unexpected status code."
-  }}
-  const calculateHealth = (status, responseTime) => {
-  let score = 100
-
-  if (status >= 400 && status < 500) {
-    score -= 30
-  }
-
-  if (status >= 500) {
-    score -= 60
-  }
-
-  if (responseTime > 1000) {
-    score -= 20
-  } else if (responseTime > 500) {
-    score -= 10
-  }
-
-  return Math.max(score, 0)
-  }
   const investigateAPI = async () => {
     if (!url) return
 
     setLoading(true)
     setResult(null)
 
-    const startTime = performance.now()
-
     try {
-      const response = await fetch(url)
-      const responseTime = Math.round(performance.now() - startTime)
+      const cleanUrl = url.trim().replace(/^['"]|['"]$/g, "")
 
-      const contentType = response.headers.get("content-type") || ""
-      const isJson = contentType.includes("application/json")
+      const response = await fetch(
+  `http://127.0.0.1:8000/analyze?url=${encodeURIComponent(cleanUrl)}`
+)
 
-      let data
+      console.log("Backend response:", response.status)
 
-      if (isJson) {
-        data = await response.json()
-      } else {
-        data = await response.text()
+      const data = await response.json()
+
+      console.log("Backend data:", data)
+
+      if (!response.ok) {
+        setResult({
+          error: data.detail || "Could not analyze this API."
+        })
+        return
       }
 
       setResult({
-        status: response.status,
-        responseTime,
-        isJson,
-        data,
-        analysis: analyzeStatus(response.status),
-        health: calculateHealth(response.status, responseTime)
+        status: data.status_code,
+        responseTime: data.response_time_ms,
+        isJson: data.is_json,
+        data: data,
+        analysis: data.status_analysis,
+        health: data.health_score
       })
-    } catch {
+    } catch (error) {
+      console.error("API Detective error:", error)
+
       setResult({
-        error: "Could not connect to this API."
+        error: `Connection error: ${error.message}`
       })
     } finally {
       setLoading(false)
@@ -152,8 +85,7 @@ function App() {
                 <div className="stats">
                   <div>
                     <span>STATUS</span>
-                    <strong>{result.analysis.category} 
-                    </strong>
+                    <strong>{result.analysis.category}</strong>
                   </div>
 
                   <div>
@@ -173,43 +105,57 @@ function App() {
                     </strong>
                   </div>
                 </div>
+
                 <div className="health">
                   <span>API HEALTH</span>
                   <h3>
                     {result.health >= 80
-                    ? "🟢"
-                    : result.health >= 50
-                    ? "🟡"
-                    : "🔴"}{" "}
+                      ? "🟢"
+                      : result.health >= 50
+                      ? "🟡"
+                      : "🔴"}{" "}
                     {result.health}/100
                   </h3>
                 </div>
+
+                <div className="performance">
+                  <span>PERFORMANCE</span>
+                  <h3>
+                    {result.responseTime < 300
+                      ? "🟢 Fast"
+                      : result.responseTime <= 1000
+                      ? "🟡 Moderate"
+                      : "🔴 Slow"}
+                  </h3>
+                </div>
+
                 <div className="diagnosis">
                   <span>DETECTIVE ANALYSIS</span>
+
                   <h3>
-                    {result.analysis.severity === "CRITICAL"
-                    ? "🔴"
-                    : result.analysis.severity === "HIGH"
-                    ? "🟠"
-                    : result.analysis.severity === "MEDIUM"
-                    ? "🟡"
-                    : "🟢"}{" "}
+                    {result.analysis.severity === "HIGH"
+                      ? "🟠"
+                      : result.analysis.severity === "MEDIUM"
+                      ? "🟡"
+                      : result.analysis.severity === "LOW"
+                      ? "🟢"
+                      : "🔴"}{" "}
                     {result.analysis.severity}
                   </h3>
+
                   <p>{result.analysis.message}</p>
-                  </div>
-                  <div className="endpoint">
-                    <span>ENDPOINT</span>
-                    <p>{url}</p>
-                  </div>
+                </div>
+
+                <div className="endpoint">
+                  <span>ENDPOINT</span>
+                  <p>{url}</p>
+                </div>
 
                 <div className="response">
                   <h3>RESPONSE DATA</h3>
 
                   <pre>
-                    {typeof result.data === "string"
-                      ? result.data
-                      : JSON.stringify(result.data, null, 2)}
+                    {JSON.stringify(result.data, null, 2)}
                   </pre>
                 </div>
               </>
